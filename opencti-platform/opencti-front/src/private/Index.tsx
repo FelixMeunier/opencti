@@ -15,6 +15,7 @@ import SettingsMessagesBanner, { useSettingsMessagesBannerHeight } from './compo
 import type { Theme } from '../components/Theme';
 import { RootSettings$data } from './__generated__/RootSettings.graphql';
 import Loader from '../components/Loader';
+import useHelper from '../utils/hooks/useHelper';
 
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const StixObjectOrStixRelationship = lazy(() => import('./components/StixObjectOrStixRelationship'));
@@ -46,6 +47,8 @@ const Index = ({ settings }: IndexProps) => {
   const {
     bannerSettings: { bannerHeight },
   } = useAuth();
+  const { isFeatureEnable } = useHelper();
+  const isDraftFeatureEnabled = isFeatureEnable('DRAFT_WORKSPACE');
   const settingsMessagesBannerHeight = useSettingsMessagesBannerHeight();
   const boxSx = {
     flexGrow: 1,
@@ -121,9 +124,11 @@ const Index = ({ settings }: IndexProps) => {
               <Route path="/trash/*"
                 element={boundaryWrapper(RootTrash)}
               />
-              <Route path="/drafts/*"
-                element={boundaryWrapper(RootDrafts)}
-              />
+              {isDraftFeatureEnabled && (
+                <Route path="/drafts/*"
+                  element={boundaryWrapper(RootDrafts)}
+                />
+              )}
               <Route
                 path="/workspaces/*"
                 element={boundaryWrapper(RootWorkspaces)}
