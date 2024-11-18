@@ -483,8 +483,6 @@ export interface TargetEntity {
   name?: string;
 }
 
-const getLocalStorageKey = (entityId: string) => `${entityId}_stixCoreRelationshipCreationFromEntity`;
-
 const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelationshipCreationFromEntityProps> = (props) => {
   const {
     targetEntities: targetEntitiesProps = [],
@@ -503,6 +501,8 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
     openExports = false,
     handleReverseRelation = undefined,
   } = props;
+  const LOCAL_STORAGE_KEY = `${entityId}_stixCoreRelationshipCreationFromEntity`;
+
   let isOnlySDOs = false;
   let isOnlySCOs = false;
   let actualTypeFilterValues = [
@@ -561,8 +561,9 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
   const containerRef = useRef(null);
 
   const { viewStorage, helpers } = usePaginationLocalStorage<StixCoreRelationshipCreationFromEntityStixCoreObjectsLinesQuery$variables>(
-    getLocalStorageKey(entityId),
+    LOCAL_STORAGE_KEY,
     {},
+    true,
   );
   const { searchTerm = '', orderAsc: storageOrderAsc, sortBy: storageSortBy, filters } = viewStorage;
 
@@ -700,7 +701,7 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
 
   const {
     selectedElements,
-  } = useEntityToggle(getLocalStorageKey(entityId));
+  } = useEntityToggle(LOCAL_STORAGE_KEY);
 
   useEffect(() => {
     const newTargetEntities: TargetEntity[] = Object.values(selectedElements).map((item) => ({
@@ -787,7 +788,7 @@ const StixCoreRelationshipCreationFromEntity: FunctionComponent<StixCoreRelation
                       rootRef={tableRootRef ?? undefined}
                       dataColumns={buildColumns(platformModuleHelpers)}
                       resolvePath={(data: StixCoreRelationshipCreationFromEntityStixCoreObjectsLines_data$data) => data.stixCoreObjects?.edges?.map((n) => n?.node)}
-                      storageKey={getLocalStorageKey(entityId)}
+                      storageKey={LOCAL_STORAGE_KEY}
                       lineFragment={stixCoreRelationshipCreationFromEntityStixCoreObjectsLineFragment}
                       initialValues={{}}
                       toolbarFilters={contextFilters}
