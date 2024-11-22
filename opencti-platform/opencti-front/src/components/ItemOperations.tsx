@@ -1,7 +1,7 @@
 import Chip from '@mui/material/Chip';
 import React, { FunctionComponent } from 'react';
 import makeStyles from '@mui/styles/makeStyles';
-import useTheme from '@mui/styles/useTheme';
+import { useTheme } from '@mui/styles';
 import type { Theme } from './Theme';
 
 const useStyles = makeStyles(() => ({
@@ -50,7 +50,7 @@ const operationStylesDark = {
 
 const ItemOperations: FunctionComponent<ItemOperationsProps> = ({ draftOperation }) => {
   const classes = useStyles();
-  const theme: Theme = useTheme();
+  const theme = useTheme<Theme>();
 
   const getChipStyle = () => {
     switch (draftOperation) {
