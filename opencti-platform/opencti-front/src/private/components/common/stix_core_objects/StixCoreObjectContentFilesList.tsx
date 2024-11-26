@@ -125,12 +125,7 @@ const StixCoreObjectContentFilesList = ({
 
   return (
     <List>
-      {files.length === 0
-        && <ListItem
-          dense={true}
-          divider={true}
-           ></ListItem>
-      }
+      {files.length === 0 && <ListItem dense={true} divider={true} />}
       {files.map((file) => (
         <Fragment key={file.id}>
           <Tooltip title={`${file.name} (${file.metaData?.mimetype ?? ''})`}>

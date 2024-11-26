@@ -139,6 +139,10 @@ const StixCoreObjectFileExportComponent = ({
           resetForm();
           close();
         },
+        onError: () => {
+          resetForm();
+          close();
+        },
       });
     };
 
@@ -277,12 +281,16 @@ const StixCoreObjectFileExportComponent = ({
 export type StixCoreObjectFileExportProps = Omit<StixCoreObjectFileExportComponentProps, 'connectorsQueryRef'>;
 
 const StixCoreObjectFileExport = (props: StixCoreObjectFileExportProps) => {
+  const { OpenFormComponent } = props;
   const connectorsQueryRef = useQueryLoading<StixCoreObjectFileExportQuery>(
     stixCoreObjectFileExportQuery,
   );
 
   return (
     <>
+      {!connectorsQueryRef && (
+        <OpenFormComponent onOpen={() => {}} isExportPossible={false} />
+      )}
       {connectorsQueryRef && (
         <React.Suspense>
           <StixCoreObjectFileExportComponent
