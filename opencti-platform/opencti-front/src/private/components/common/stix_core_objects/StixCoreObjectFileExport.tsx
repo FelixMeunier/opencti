@@ -58,7 +58,7 @@ type StixCoreObjectFileExportComponentProps = {
   scoName?: string;
   redirectToContentTab?: boolean;
   onClose?: () => void
-  onFileChange?: (fileName?: string, isDeleted?: boolean) => void
+  onExportCompleted?: (fileName?: string, isDeleted?: boolean) => void
 } & Pick<StixCoreObjectFileExportFormProps, 'templates' | 'filesFromTemplate' | 'defaultValues'>;
 
 const StixCoreObjectFileExportComponent = ({
@@ -72,7 +72,7 @@ const StixCoreObjectFileExportComponent = ({
   templates,
   defaultValues,
   onClose,
-  onFileChange,
+  onExportCompleted,
 }: StixCoreObjectFileExportComponentProps) => {
   const navigate = useNavigate();
   const { t_i18n } = useFormatter();
@@ -134,7 +134,7 @@ const StixCoreObjectFileExportComponent = ({
         onCompleted: (result) => {
           setSubmitting(false);
           if (result.stixCoreObjectEdit?.importPush) {
-            onFileChange?.(result.stixCoreObjectEdit.importPush.id);
+            onExportCompleted?.(result.stixCoreObjectEdit.importPush.id);
           }
           resetForm();
           close();
