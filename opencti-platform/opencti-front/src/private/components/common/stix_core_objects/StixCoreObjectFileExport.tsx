@@ -94,13 +94,13 @@ const StixCoreObjectFileExportComponent = ({
   if (filesFromTemplate && filesFromTemplate.length > 0) {
     activeConnectors.push({
       ...BUILT_IN_FROM_FILE_TEMPLATE,
-      label: t_i18n('Built-in: HTML template to PDF'),
+      label: t_i18n('HTML content files to PDF'),
     });
   }
   if (templates && templates.length > 0) {
     activeConnectors.push({
       ...BUILT_IN_FROM_TEMPLATE,
-      label: t_i18n('Built-in: template to HTML/PDF'),
+      label: t_i18n('Generate Fintel from template'),
     });
   }
 
