@@ -24,7 +24,6 @@ const buildStringAttribute = (inputValue: unknown, attributeType?: string, inTab
   if (attributeType === 'date') {
     value = dateFormat(new Date(value)) ?? '';
   } else if (attributeType === 'markdown') {
-    // Don't remove the call to sanitize, it's important for security.
     const mark = marked.parse(value, {
       async: false,
       breaks: true,
@@ -35,9 +34,8 @@ const buildStringAttribute = (inputValue: unknown, attributeType?: string, inTab
         }
       },
     });
-    console.log('marked', mark);
+    // Don't remove the call to sanitize, it's important for security.
     const stringHtml = DOMPurify.sanitize(mark);
-    console.log('saniti', stringHtml);
     // We sanitize the given html above.
     value = <div dangerouslySetInnerHTML={{ __html: stringHtml }} />;
   } else if (inTable) {
