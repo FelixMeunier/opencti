@@ -37,6 +37,8 @@ describe('Middleware test coverage on organization sharing verification', () => 
       };
       const userInExternalOrgEntity = await addUser(testContext, ADMIN_USER, userInExternalOrgInput);
       await assignOrganizationToUser(testContext, ADMIN_USER, userInExternalOrgEntity.internal_id, externalOrg.id);
+
+      // Marking: TLP:GREEN
       const userToGroupInput: InternalRelationshipAddInput = {
         relationship_type: 'member-of',
         toId: GREEN_DISINFORMATION_ANALYST_GROUP.id

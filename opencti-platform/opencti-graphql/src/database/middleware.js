@@ -6,6 +6,7 @@ import { compareUnsorted } from 'js-deep-equals';
 import { SEMATTRS_DB_NAME, SEMATTRS_DB_OPERATION } from '@opentelemetry/semantic-conventions';
 import * as jsonpatch from 'fast-json-patch';
 import {
+  AccessRequiredError,
   ALREADY_DELETED_ERROR,
   AlreadyDeletedError,
   DatabaseError,
@@ -161,7 +162,8 @@ import {
   SYSTEM_USER,
   userFilterStoreElements,
   validateUserAccessOperation,
-  controlUserRestrictDeleteAgainstElement
+  controlUserRestrictDeleteAgainstElement,
+  canRequestAccess
 } from '../utils/access';
 import { isRuleUser, RULES_ATTRIBUTES_BEHAVIOR } from '../rules/rules-utils';
 import { instanceMetaRefsExtractor, isSingleRelationsRef, } from '../schema/stixEmbeddedRelationship';
@@ -2992,6 +2994,10 @@ const createEntityRaw = async (context, user, rawInput, type, opts = {}) => {
       // If nothing accessible for this user, throw ForbiddenAccess
       if (filteredEntities.length === 0) {
         // TODO ici
+        const entitiesThatRequiresAccess = await canRequestAccess(context, user, existingEntities);
+        if (entitiesThatRequiresAccess.length > 0) {
+          throw AccessRequiredError('Restricted entity already exists', { entityIds: entitiesThatRequiresAccess.map((value) => value.internal_id) });
+        }
         throw UnsupportedError('Restricted entity already exists', { doc_code: 'RESTRICTED_ELEMENT' });
       }
       // If inferred entity
