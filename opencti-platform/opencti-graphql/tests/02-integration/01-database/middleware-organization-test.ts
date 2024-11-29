@@ -1,13 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { now } from 'moment';
+import { GraphQLError } from 'graphql/index';
 import { enableCEAndUnSetOrganization, enableEEAndSetOrganization } from '../../utils/testQueryHelper';
 import { ADMIN_USER, GREEN_DISINFORMATION_ANALYST_GROUP, PLATFORM_ORGANIZATION, testContext } from '../../utils/testQuery';
 import { addOrganization } from '../../../src/modules/organization/organization-domain';
 import type { InternalRelationshipAddInput, OrganizationAddInput, ThreatActorIndividualAddInput } from '../../../src/generated/graphql';
 import { addUser, assignOrganizationToUser, findById as findUserById, userAddRelation, userDelete } from '../../../src/domain/user';
 import { type BasicStoreEntityOrganization } from '../../../src/modules/organization/organization-types';
-import type { BasicStoreEntity } from '../../../src/types/store';
-import { waitInSec } from '../../../src/database/utils';
 import { addThreatActorIndividual } from '../../../src/modules/threatActorIndividual/threatActorIndividual-domain';
 import { addOrganizationRestriction } from '../../../src/domain/stix';
 import type { AuthUser } from '../../../src/types/user';
@@ -43,11 +42,7 @@ describe('Middleware test coverage on organization sharing verification', () => 
         toId: GREEN_DISINFORMATION_ANALYST_GROUP.id
       };
       await userAddRelation(testContext, ADMIN_USER, userInExternalOrgEntity.internal_id, userToGroupInput);
-
-      console.log('userInExternalOrgEntity => ', { userInExternalOrgEntity });
-
       userInExternalOrg = await findUserById(testContext, ADMIN_USER, userInExternalOrgEntity.id);
-      console.log('userInExternalOrg => ', { userInExternalOrg });
       expect(userInExternalOrg.inside_platform_organization).toBeFalsy();
 
       const userInPlatformOrgInput = {
@@ -60,9 +55,7 @@ describe('Middleware test coverage on organization sharing verification', () => 
       const userInPlatformOrgEntity = await addUser(testContext, ADMIN_USER, userInPlatformOrgInput);
       await assignOrganizationToUser(testContext, ADMIN_USER, userInPlatformOrgEntity.internal_id, PLATFORM_ORGANIZATION.id);
       await userAddRelation(testContext, ADMIN_USER, userInPlatformOrgEntity.internal_id, userToGroupInput);
-      console.log('userInPlatformOrgEntity => ', { userInPlatformOrgEntity });
       userInPlatformOrg = await findUserById(testContext, ADMIN_USER, userInPlatformOrgEntity.id);
-      console.log('userInPlatformOrg => ', { userInPlatformOrg });
       expect(userInPlatformOrg.inside_platform_organization).toBeTruthy();
     });
 
@@ -79,7 +72,13 @@ describe('Middleware test coverage on organization sharing verification', () => 
         name: threatActorIndividualName,
         description: 'Created by external user'
       };
-      const threatActorExt = await addThreatActorIndividual(testContext, userInExternalOrg, inputNext);
+      try {
+        await addThreatActorIndividual(testContext, userInExternalOrg, inputNext);
+        expect(true, 'An exception should been raised before this line').toBeFalsy();
+      } catch (e) {
+        const exception = e as GraphQLError;
+        expect(exception.message).toBe('Restricted entity already exists');
+      }
 
       // await waitInSec(300);
     });

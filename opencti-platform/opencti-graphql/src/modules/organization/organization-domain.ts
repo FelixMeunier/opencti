@@ -25,6 +25,8 @@ import { publishUserAction } from '../../listener/UserActionListener';
 import type { BasicStoreCommon, BasicStoreEntity } from '../../types/store';
 import { userSessionRefresh } from '../../domain/user';
 
+export const ORGA_SHARING_REQUEST_FF = 'ORGA_SHARING_REQUEST_FF';
+
 // region CRUD
 export const findById = (context: AuthContext, user: AuthUser, organizationId: string) => {
   return storeLoadById<BasicStoreEntityOrganization>(context, user, organizationId, ENTITY_TYPE_IDENTITY_ORGANIZATION);
