@@ -34,9 +34,9 @@ const buildStringAttribute = (inputValue: unknown, attributeType?: string, inTab
         }
       },
     });
-    // Don't remove the call to sanitize, it's important for security.
-    const stringHtml = DOMPurify.sanitize(mark);
+    // !! Don't remove the call to sanitize, it's important to secure the call to dangerouslySetInnerHTML !!
     // We sanitize the given html above.
+    const stringHtml = DOMPurify.sanitize(mark);
     value = <div dangerouslySetInnerHTML={{ __html: stringHtml }} />;
   } else if (inTable) {
     value = toWrappableString(value);
