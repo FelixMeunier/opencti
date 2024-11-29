@@ -22,8 +22,8 @@ type ExclusionListEdge {
 }
 
 type ExclusionListCacheStatus {
-  refreshAskDate: DateTime!
-  cacheDate: DateTime!
+  refreshAskDate: String!
+  cacheDate: String!
   allNodeCacheUpdated: Boolean!
 }
 
@@ -58,7 +58,7 @@ type Query {
     filters: FilterGroup
     search: String
   ): ExclusionListConnection @auth(for: [SETTINGS_SETCUSTOMIZATION])
-  exclusionListCacheStatus():
+  exclusionListCacheStatus: ExclusionListCacheStatus @auth(for: [SETTINGS_SETCUSTOMIZATION])
 }
 
 type Mutation {
