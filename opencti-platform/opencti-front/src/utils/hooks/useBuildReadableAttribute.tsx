@@ -1,24 +1,47 @@
 import { renderToString } from 'react-dom/server';
 import React, { ReactElement } from 'react';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 import { dateFormat } from '../Time';
 import { useBuildFilterKeysMapFromEntityType } from '../filters/filtersUtils';
 import type { WidgetColumn } from '../widget/widget';
-import MarkdownDisplay from '../../components/MarkdownDisplay';
+import { toWrappableString } from '../String';
 
-const buildStringAttribute = (inputValue: unknown, attributeType?: string, inTable?: boolean) => {
+const MARKDOWN_ATTRIBUTES = [
+  'description',
+  'x_opencti_description',
+  'representative.secondary',
+  'attribute_abstract',
+  'opinion',
+  'explanation',
+  'contact_information',
+  'objective',
+];
+
+const buildStringAttribute = (inputValue: unknown, attributeType?: string, inTable = false) => {
   let value: string | ReactElement = typeof inputValue === 'string' ? inputValue : JSON.stringify(inputValue);
-  if (attributeType) {
-    if (attributeType === 'date') value = dateFormat(new Date(value)) ?? '';
-    if (attributeType === 'text') {
-      const valueInMarkdown = (<MarkdownDisplay
-        content={value}
-        remarkGfmPlugin
-        commonmark
-        disableWarningAtLinkClick
-        emptyStringIfUndefined
-                               />);
-      value = inTable ? valueInMarkdown : renderToString(valueInMarkdown);
-    }
+
+  if (attributeType === 'date') {
+    value = dateFormat(new Date(value)) ?? '';
+  } else if (attributeType === 'markdown') {
+    // Don't remove the call to sanitize, it's important for security.
+    const mark = marked.parse(value, {
+      async: false,
+      breaks: true,
+      walkTokens: (token) => {
+        if (token.type === 'text' && inTable) {
+          // eslint-disable-next-line no-param-reassign
+          token.text = toWrappableString(token.text);
+        }
+      },
+    });
+    console.log('marked', mark);
+    const stringHtml = DOMPurify.sanitize(mark);
+    console.log('saniti', stringHtml);
+    // We sanitize the given html above.
+    value = <div dangerouslySetInnerHTML={{ __html: stringHtml }} />;
+  } else if (inTable) {
+    value = toWrappableString(value);
   }
   return value;
 };
@@ -26,9 +49,13 @@ const buildStringAttribute = (inputValue: unknown, attributeType?: string, inTab
 const useBuildReadableAttribute = () => {
   const stixCoreObjectsAttributesMap = useBuildFilterKeysMapFromEntityType(['Stix-Core-Object']);
 
-  const buildReadableAttribute = (attributeData: unknown, displayInfo: WidgetColumn, inTab = false) => {
+  const buildReadableAttribute = (attributeData: unknown, displayInfo: WidgetColumn, inTable = false) => {
     const { attribute, displayStyle } = displayInfo;
-    const attributeType = attribute ? stixCoreObjectsAttributesMap.get(attribute)?.type : undefined;
+    let attributeType: string | undefined;
+    if (attribute) {
+      attributeType = stixCoreObjectsAttributesMap.get(attribute)?.type;
+      if (MARKDOWN_ATTRIBUTES.includes(attribute)) attributeType = 'markdown';
+    }
 
     let readableAttribute;
     if (Array.isArray(attributeData)) {
@@ -44,7 +71,7 @@ const useBuildReadableAttribute = () => {
         readableAttribute = attributeData.map((r) => buildStringAttribute(r, attributeType)).join(', ');
       }
     } else {
-      readableAttribute = buildStringAttribute(attributeData, attributeType, inTab);
+      readableAttribute = buildStringAttribute(attributeData, attributeType, inTable);
     }
     return readableAttribute;
   };
