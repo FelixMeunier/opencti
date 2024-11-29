@@ -41,7 +41,7 @@ describe('Hook: useBuildReadableAttribute', () => {
     const booleanAttribute = buildReadableAttribute(true, { attribute: 'revoked' });
     expect(booleanAttribute).toEqual('true');
   });
-  it('should display correctly text attributes', () => {
+  it('should remove code bringing security issues like xss', () => {
     const { hook } = testRenderHook(() => useBuildReadableAttribute());
     const { buildReadableAttribute } = hook.result.current;
 
